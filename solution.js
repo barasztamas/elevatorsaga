@@ -1,23 +1,14 @@
 {
     init: (elevators, floors) => {
         elevators.forEach(e=>{
+            e.direction = ()=>{
+                if(e.destinationQueue.length>0 && e.destinationQueue[0]<e.currentFloor()) return "down";
+                if(e.destinationQueue.length>0 && e.destinationQueue[0]>e.currentFloor()) return "up";
+                return "-"
+            };
             e.showDirection = ()=>{
-                //console.log(e.destinationQueue, e.currentFloor())
-                if(e.destinationQueue.length==0){
-                    e.goingUpIndicator(true);
-                    e.goingDownIndicator(true);
-                    return
-                }
-                if(e.destinationQueue[0]<e.currentFloor()){
-                    e.goingUpIndicator(false);
-                    e.goingDownIndicator(true);
-                    return
-                }
-                if(e.destinationQueue[0]>e.currentFloor()){
-                    e.goingUpIndicator(true);
-                    e.goingDownIndicator(false);
-                    return
-                }
+                e.goingUpIndicator(e.direction()!="down");
+                e.goingDownIndicator(e.direction()!="up");
             };
             e.addToQueue = nr=>{
                 e.goToFloor(nr);
@@ -33,7 +24,7 @@
                 e.showDirection();
             });
         });
-        
+
     },
         update: (dt, elevators, floors) => {
         }
