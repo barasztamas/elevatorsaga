@@ -1,17 +1,14 @@
 {
     init: (elevators, floors) => {
         elevators.forEach(e=>{
-            e.direction = ()=>{
-                if(e.destinationQueue.length>0 && e.destinationQueue[0]<e.currentFloor()) return -1;
-                if(e.destinationQueue.length>0 && e.destinationQueue[0]>e.currentFloor()) return 1;
-                return 0;
-            };
+            e.directedQueue = [];
+            e.direction = 0;
             e.showDirection = ()=>{
-                e.goingUpIndicator(e.direction()>=0);
-                e.goingDownIndicator(e.direction()<=0);
+                e.goingUpIndicator(e.direction>=0);
+                e.goingDownIndicator(e.direction<=0);
             };
-            e.addToQueue = nr=>{
-                e.goToFloor(nr);
+            e.addToQueue = (nr, direction)=>{
+                if(!e.destinationQueue.includes(nr)) e.goToFloor(nr);
                 e.showDirection();
             };
             e.on("floor_button_pressed",nr=>{
