@@ -21,57 +21,58 @@
                 e.goingUpIndicator(e.direction()>=0);
                 e.goingDownIndicator(e.direction()<=0);
             };
-            e.estimatedFreeCapacity = () => (1-e.loadFactor())*e.maxPassengerCount()
+            e.estimatedFreeCapacity = () => (0.8-e.loadFactor())*e.maxPassengerCount()
+            e.fitsInDirection = nr => ((nr-(e.destinationQueue[0]??nr))*e.queueDirection>=0 //fits in queue direction
+                                       ||(nr-e.currentFloor())*e.direction()>0); //fits in current direction
+            e.addDestination = nr => {
+                myAddToQueue(nr, e.queueDirection, e.destinationQueue);
+                e.checkDestinationQueue();
+                e.showDirection();
+            };
             e.tryAddDestination = (nr, direction)=>{
                 if(e.destinationQueue.length==0) {
-                    console.log('dest', e.index ,nr, direction, 'dest_newque', e.currentFloor(), e.destinationDirection(), e.queueDirection, e.destinationQueue);
+                    console.log('dest', e.index ,nr, direction, 'dest_newque', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                     if(nr!=e.currentFloor()) {
-                        e.queueDirection=direction!=0 ? direction : Math.sign(nr-e.currentFloor());
-                        myAddToQueue(nr, e.queueDirection, e.destinationQueue);
-                        e.checkDestinationQueue();
-                        e.showDirection();
+                        e.queueDirection=direction;
+                        e.addDestination(nr);
                     };
-                    return true;
-                };
-                if(direction==0) {
-                    if(e.destinationQueue.includes(nr)){
-                        return true;
-                    };
-                    if(
-                        (nr-e.destinationQueue[0])*e.queueDirection>=0 //fits in queue direction
-                        ||(nr-e.currentFloor())*e.direction()>0 //fits in current direction
-                    ) {
-                        console.log('dest', e.index ,nr, direction, 'dest', e.currentFloor(), e.destinationDirection(), e.queueDirection, e.destinationQueue);
-                        myAddToQueue(nr, e.queueDirection, e.destinationQueue);
-                        e.checkDestinationQueue();
-                        e.showDirection();
-                        return true;
-                    };
-                    console.log('dest', e.index,nr, direction, 'sec', e.currentFloor(), e.destinationDirection(), e.queueDirection, e.destinationQueue);
-                    myAddToQueue(nr, -e.queueDirection, e.additionalQueue);
                     return true;
                 };
                 if(direction==e.queueDirection && e.estimatedFreeCapacity()>1) {
                     if(e.destinationQueue.includes(nr)){
+                        console.log('dest', e.index ,nr, direction, 'dest_includes', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                         return true;
                     };
-                    if(
-                        (nr-e.destinationQueue[0])*e.queueDirection>=0 //fits in queue direction
-                        ||(nr-e.currentFloor())*e.direction()>0 //fits in current direction
-                    ) {
-                        console.log('dest', e.index ,nr, direction, 'dest', e.currentFloor(), e.destinationDirection(), e.queueDirection, e.destinationQueue);
-                        myAddToQueue(nr, e.queueDirection, e.destinationQueue);
-                        e.checkDestinationQueue();
-                        e.showDirection();
+                    if(e.fitsInDirection(nr)) {
+                        console.log('dest', e.index ,nr, direction, 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
+                        e.addDestination(nr);
                         return true;
                     };
                 };
-                console.log('dest', e.index, nr, direction, 'false', e.currentFloor(), e.destinationDirection(), e.queueDirection, e.destinationQueue);
+                console.log('dest', e.index ,nr, direction, 'false', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                 return false;
             };
             e.on("floor_button_pressed",nr=>{
-                console.log('button', e.index, nr);
-                e.tryAddDestination(nr, 0);
+                if(e.destinationQueue.length==0) {
+                    console.log('button', e.index ,nr, 'newque', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
+                    if(nr!=e.currentFloor()) {
+                        e.queueDirection=Math.sign(nr-e.currentFloor());
+                        e.addDestination(nr);
+                    };
+                    return;
+                };
+                if(e.destinationQueue.includes(nr)){
+                    console.log('button', e.index ,nr, 'dest_includes', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
+                    return;
+                };
+                if(e.fitsInDirection(nr)) {
+                    console.log('button', e.index ,nr, 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
+                    e.addDestination(nr);
+                    return;
+                };
+                console.log('button', e.index ,nr, 'sec', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
+                myAddToQueue(nr, -e.queueDirection, e.additionalQueue);
+                return;
             });
             e.on("stopped_at_floor",nr=>{
                 console.log('stop', e.index, nr, e.queueDirection, e.destinationQueue, e.additionalQueue);
