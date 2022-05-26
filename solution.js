@@ -9,7 +9,7 @@
         elevators.sort((e1, e2) => e2.maxPassengerCount()-e1.maxPassengerCount());
         commonQueue = [[],[],[]];
         addToCommonQueue = (nr, direction)=>{
-            console.log('addcommon', nr, direction, commonQueue[direction+1]);
+            console.log('addcommon', '-', nr, direction, commonQueue[direction+1]);
             myAddToQueue(nr, direction, commonQueue[direction+1]);
         };
         elevators.forEach((e,i)=>{
@@ -30,12 +30,13 @@
                 e.showDirection();
             };
             e.tryAddDestination = (nr, direction)=>{
+                console.log('dest', e.index ,nr, direction, 'start', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                 if(e.destinationQueue.length==0) {
-                    console.log('dest', e.index ,nr, direction, 'dest_newque', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                     if(nr!=e.currentFloor()) {
                         e.queueDirection=direction;
                         e.addDestination(nr);
                     };
+                    console.log('dest', e.index ,nr, direction, 'dest_newque', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                     return true;
                 };
                 if(direction==e.queueDirection && e.estimatedFreeCapacity()>1) {
@@ -44,8 +45,8 @@
                         return true;
                     };
                     if(e.fitsInDirection(nr)) {
-                        console.log('dest', e.index ,nr, direction, 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                         e.addDestination(nr);
+                        console.log('dest', e.index ,nr, direction, 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.estimatedFreeCapacity(), e.destinationQueue);
                         return true;
                     };
                 };
@@ -53,29 +54,30 @@
                 return false;
             };
             e.on("floor_button_pressed",nr=>{
+                console.log('button', e.index ,nr,'-', 'start', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                 if(e.destinationQueue.length==0) {
-                    console.log('button', e.index ,nr, 'newque', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                     if(nr!=e.currentFloor()) {
                         e.queueDirection=Math.sign(nr-e.currentFloor());
                         e.addDestination(nr);
                     };
+                    console.log('button', e.index ,nr,'-', 'newque', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                     return;
                 };
                 if(e.destinationQueue.includes(nr)){
-                    console.log('button', e.index ,nr, 'dest_includes', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
+                    console.log('button', e.index ,nr,'-', 'dest_includes', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                     return;
                 };
                 if(e.fitsInDirection(nr)) {
-                    console.log('button', e.index ,nr, 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                     e.addDestination(nr);
+                    console.log('button', e.index ,nr,'-', 'dest', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                     return;
                 };
-                console.log('button', e.index ,nr, 'sec', e.currentFloor(), e.queueDirection, e.direction(), e.destinationQueue);
                 myAddToQueue(nr, -e.queueDirection, e.additionalQueue);
+                console.log('button', e.index ,nr,'-', 'additional', e.currentFloor(), e.queueDirection, e.direction(), e.additionalQueue);
                 return;
             });
             e.on("stopped_at_floor",nr=>{
-                console.log('stop', e.index, nr, e.queueDirection, e.destinationQueue, e.additionalQueue);
+                console.log('stop', e.index, nr, 'start', e.queueDirection, e.destinationQueue, e.additionalQueue);
                 if(e.destinationQueue.length==0) {
                     newdirection = e.queueDirection==0 ? 1 : -e.queueDirection;
                     e.destinationQueue=e.additionalQueue.splice(0);
@@ -97,11 +99,12 @@
                     e.checkDestinationQueue();
                 };
                 e.showDirection();
+                console.log('stop', e.index, nr, 'finish', e.queueDirection, e.destinationQueue, e.additionalQueue);
             });
         });
         floors.forEach(f=>{
             f.myButtonPressed = (direction)=>{
-                console.log('floorbutton', f.floorNum(),direction);
+                console.log('floorbutton','-', f.floorNum(),direction);
                 elevators
                     .sort((e1, e2) => (e1.estimatedFreeCapacity()-e1.destinationQueue.length*1.5) - (e2.estimatedFreeCapacity()-e2.destinationQueue.length*1.5))
                     .reduce((b,e)=>b||(e.tryAddDestination(f.floorNum(),direction)),false)
