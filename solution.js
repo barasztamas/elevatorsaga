@@ -1,11 +1,14 @@
 {
     init: (elevators, floors) => {
-        elevators.forEach(e=>{
-            e.directedQueue = [];
-            e.direction = 0;
-            e.showDirection = ()=>{
-                e.goingUpIndicator(e.direction>=0);
-                e.goingDownIndicator(e.direction<=0);
+        directionBetween = (from, to) => Math.sign(to-from);
+        lastElement = a => a[a.length-1];
+        elevators.forEach((e, i)=>{
+            e.index = i;
+            e.directionGoing = () => directionBetween(e.currentFloor(), e.destinationQueue[0]??e.currentFloor());
+            e.directionShown = () => 1 * e.goingUpIndicator() - 1 * e.goingDownIndicator();
+            e.showDirection = (direction=e.directionGoing()) => {
+                e.goingUpIndicator(direction>=0);
+                e.goingDownIndicator(direction<=0);
             };
             e.addToQueue = (nr, direction)=>{
                 if(!e.destinationQueue.includes(nr)) e.goToFloor(nr);
