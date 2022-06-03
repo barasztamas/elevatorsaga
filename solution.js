@@ -5,10 +5,13 @@
             return inclusive ? (n - a) * (n - b) <= 0 : (n - a) * (n - b) < 0;
         };
         lastElement = a => a[a.length-1];
+        sortArray = (array, direction) => {
+            array.sort((a,b) => direction*(a-b));
+        };
         myAddToQueue = (nr, direction, queue)=>{
             if(!queue.includes(nr)) {
                 queue.push(nr);
-                queue.sort((a,b) => direction*(a-b));
+                sortArray(queue, direction);
                 return true;
             };
             return false;
@@ -26,10 +29,12 @@
                     || isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
             }
             e.addToQueue = nr => {
+                console.log(nr, e);
                 if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
                     e.checkDestinationQueue();
                     e.showDirection();
                 };
+                console.log(nr, e);
             };
             e.on("floor_button_pressed", nr=>{
                 if(e.fitsInQueue(nr))
