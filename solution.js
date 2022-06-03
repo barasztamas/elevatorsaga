@@ -1,7 +1,18 @@
 {
     init: (elevators, floors) => {
         directionBetween = (from, to) => Math.sign(to-from);
+        isBetween = (n, a, b, inclusive=true) => {
+            return inclusive ? (n - a) * (n - b) <= 0 : (n - a) * (n - b) < 0;
+        };
         lastElement = a => a[a.length-1];
+        myAddToQueue = (nr, direction, queue)=>{
+            if(!queue.includes(nr)) {
+                queue.push(nr);
+                queue.sort((a,b) => direction*(a-b));
+                return true;
+            };
+            return false;
+        };
         elevators.forEach((e, i)=>{
             e.index = i;
             e.directionGoing = () => directionBetween(e.currentFloor(), e.destinationQueue[0]??e.currentFloor());
@@ -10,12 +21,19 @@
                 e.goingUpIndicator(direction>=0);
                 e.goingDownIndicator(direction<=0);
             };
-            e.addToQueue = (nr, direction)=>{
-                if(!e.destinationQueue.includes(nr)) e.goToFloor(nr);
-                e.showDirection();
+            e.fitsInQueue = nr => {
+                return e.destinationQueue.length == 0 
+                    || isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
+            }
+            e.addToQueue = nr => {
+                if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
+                    e.checkDestinationQueue();
+                    e.showDirection();
+                };
             };
-            e.on("floor_button_pressed",nr=>{
-                e.addToQueue(nr);
+            e.on("floor_button_pressed", nr=>{
+                if(e.fitsInQueue(nr))
+                    e.addToQueue(nr);
             });
             e.on("idle",()=>{
                 e.addToQueue(0);
@@ -24,9 +42,16 @@
                 e.showDirection();
             });
         });
+        addToRandomElevator = (myElevators, nr) => {
+            if (myElevators.length>0) {
+                myElevators[Math.floor(Math.random() * myElevators.length)].addToQueue(nr);
+                return true;
+            }
+            return false;
+        };
         floors.forEach(f=>{
             f.buttonPressed = ()=>{
-                elevators[Math.floor(Math.random() * elevators.length)].addToQueue(f.floorNum());
+                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.floorNum())), f.floorNum());
             };
             f.on("up_button_pressed", f.buttonPressed);
             f.on("down_button_pressed", f.buttonPressed);
@@ -36,3 +61,4 @@
         update: (dt, elevators, floors) => {
         }
 }
+
