@@ -7,6 +7,7 @@
         lastElement = a => a[a.length-1];
         sortArray = (array, direction) => {
             array.sort((a,b) => direction*(a-b));
+            return array;
         };
         myAddToQueue = (nr, direction, queue)=>{
             if(!queue.includes(nr)) {
@@ -25,16 +26,15 @@
                 e.goingDownIndicator(direction<=0);
             };
             e.fitsInQueue = nr => {
-                return e.destinationQueue.length == 0 
+                return e.destinationQueue.length == 0 && e.directionShown()==0
+                    || e.destinationQueue.length == 0 && directionBetween(e.currentFloor(), nr) == e.directionShown()
                     || isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
-            }
+            };
             e.addToQueue = nr => {
-                console.log(nr, e);
                 if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
                     e.checkDestinationQueue();
                     e.showDirection();
                 };
-                console.log(nr, e);
             };
             e.on("floor_button_pressed", nr=>{
                 if(e.fitsInQueue(nr))
@@ -44,6 +44,10 @@
                 e.addToQueue(0);
             });
             e.on("stopped_at_floor",nr=>{
+                floorsToAdd = sortArray(e.getPressedFloors().filter(e.fitsInQueue), e.directionShown());
+                if (floorsToAdd.length>0) {
+                    e.addToQueue(floorsToAdd[0]);
+                };
                 e.showDirection();
             });
         });
@@ -66,4 +70,3 @@
         update: (dt, elevators, floors) => {
         }
 }
-
