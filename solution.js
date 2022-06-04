@@ -25,14 +25,16 @@
                 e.goingUpIndicator(direction>=0);
                 e.goingDownIndicator(direction<=0);
             };
-            e.fitsInQueue = (nr, direction)=> {
+            e.fitsInQueue = (nr, direction, isStopped)=> {
                 dirShown = e.directionShown();
                 return e.destinationQueue.length == 0 && dirShown==0
                     || e.destinationQueue.length == 0 && (direction??dirShown) == dirShown && directionBetween(e.currentFloor(), nr) == dirShown
-                    || (direction==undefined||direction==e.directionGoing()) && isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
+                    || (direction==undefined||direction==e.directionGoing()) && isBetween(nr, e.currentFloor()+(!isStopped ? e.directionGoing() : 0), e.destinationQueue[0]);
             };
             e.addToQueue = nr => {
+                //console.trace('start',e.index, nr, e.destinationQueue);
                 if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
+                    //console.trace('end',e.index, nr, e.destinationQueue);
                     e.checkDestinationQueue();
                     e.showDirection();
                 };
@@ -50,8 +52,9 @@
 
                 };
                 arrivedWithEmptyQueue = () => {
-                    floorsToAdd = sortArray(e.getPressedFloors().filter(e.fitsInQueue), e.directionShown());
+                    floorsToAdd = e.getPressedFloors().filter(f=>e.fitsInQueue(f,undefined,true));
                     if (floorsToAdd.length>0) {
+                        sortArray(floorsToAdd, e.directionShown());
                         e.addToQueue(floorsToAdd[0]);
                         arrivedWithQueue();
                     } else {
