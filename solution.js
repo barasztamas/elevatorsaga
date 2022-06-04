@@ -44,9 +44,29 @@
                 e.addToQueue(0);
             });
             e.on("stopped_at_floor",nr=>{
-                floorsToAdd = sortArray(e.getPressedFloors().filter(e.fitsInQueue), e.directionShown());
-                if (floorsToAdd.length>0) {
-                    e.addToQueue(floorsToAdd[0]);
+                arrivedWithQueue = () => {
+
+                };
+                arrivedWithEmptyQueue = () => {
+                    floorsToAdd = sortArray(e.getPressedFloors().filter(e.fitsInQueue), e.directionShown());
+                    if (floorsToAdd.length>0) {
+                        e.addToQueue(floorsToAdd[0]);
+                        arrivedWithQueue();
+                    } else {
+                        floorsToAdd = sortArray(e.getPressedFloors(), -e.directionShown());
+                        if (floorsToAdd.length>0) {
+                            e.addToQueue(floorsToAdd[0]);
+                            arrivedWithQueue();
+                        } else {
+                            //TODO várnak-e liftre;
+                        }
+                        ;
+                    };
+                };
+                if(e.getPressedFloors().length==0) {
+                    arrivedWithEmptyQueue();
+                } else {
+                    arrivedWithQueue();
                 };
                 e.showDirection();
             });
