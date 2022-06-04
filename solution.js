@@ -25,10 +25,11 @@
                 e.goingUpIndicator(direction>=0);
                 e.goingDownIndicator(direction<=0);
             };
-            e.fitsInQueue = nr => {
-                return e.destinationQueue.length == 0 && e.directionShown()==0
-                    || e.destinationQueue.length == 0 && directionBetween(e.currentFloor(), nr) == e.directionShown()
-                    || isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
+            e.fitsInQueue = (nr, direction)=> {
+                dirShown = e.directionShown();
+                return e.destinationQueue.length == 0 && dirShown==0
+                    || e.destinationQueue.length == 0 && (direction??dirShown) == dirShown && directionBetween(e.currentFloor(), nr) == dirShown
+                    || (direction==undefined||direction==e.directionGoing()) && isBetween(nr, e.currentFloor()+e.directionGoing(), e.destinationQueue[0]);
             };
             e.addToQueue = nr => {
                 if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
@@ -44,6 +45,7 @@
                 e.addToQueue(0);
             });
             e.on("stopped_at_floor",nr=>{
+                //console.table({elevator:e.imdex, floor:nr, direction:e.directionShown(), q:e.destinationQueue, pressed:e.getPressedFloors()});
                 arrivedWithQueue = () => {
 
                 };
@@ -63,7 +65,7 @@
                         ;
                     };
                 };
-                if(e.getPressedFloors().length==0) {
+                if(e.destinationQueue.length==0) {
                     arrivedWithEmptyQueue();
                 } else {
                     arrivedWithQueue();
@@ -79,11 +81,11 @@
             return false;
         };
         floors.forEach(f=>{
-            f.buttonPressed = ()=>{
-                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.floorNum())), f.floorNum());
+            f.buttonPressed = (direction) => {
+                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.floorNum(), direction)), f.floorNum());
             };
-            f.on("up_button_pressed", f.buttonPressed);
-            f.on("down_button_pressed", f.buttonPressed);
+            f.on("up_button_pressed", f.buttonPressed(1));
+            f.on("down_button_pressed", f.buttonPressed(-1));
         });
 
     },
