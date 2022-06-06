@@ -27,7 +27,8 @@
             };
             e.fitsInQueue = (nr, direction, isStopped)=> {
                 dirShown = e.directionShown();
-                return e.destinationQueue.length == 0 && dirShown==0
+                //console.trace({nr, direction, isStopped, q:e.destinationQueue, dirShown});
+                return dirShown==0
                     || e.destinationQueue.length == 0 && (direction??dirShown) == dirShown && directionBetween(e.currentFloor(), nr) == dirShown
                     || (direction==undefined||direction==e.directionGoing()) && isBetween(nr, e.currentFloor()+(!isStopped ? e.directionGoing() : 0), e.destinationQueue[0]);
             };
@@ -88,8 +89,8 @@
             f.buttonPressed = (direction) => {
                 addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.floorNum(), direction)), f.floorNum());
             };
-            f.on("up_button_pressed", f.buttonPressed(1));
-            f.on("down_button_pressed", f.buttonPressed(-1));
+            f.on("up_button_pressed", ()=>f.buttonPressed(1));
+            f.on("down_button_pressed", ()=>f.buttonPressed(-1));
         });
 
     },
