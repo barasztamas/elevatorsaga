@@ -52,14 +52,15 @@
 
                 };
                 arrivedWithEmptyQueue = () => {
-                    floorsToAdd = e.getPressedFloors().filter(f=>e.fitsInQueue(f,undefined,true));
+                    floorsToAdd = e.getPressedFloors().filter(f => f>=nr);
                     if (floorsToAdd.length>0) {
                         sortArray(floorsToAdd, e.directionShown());
                         e.addToQueue(floorsToAdd[0]);
                         arrivedWithQueue();
                     } else {
-                        floorsToAdd = sortArray(e.getPressedFloors(), -e.directionShown());
+                        floorsToAdd = e.getPressedFloors().filter(f => f<nr);
                         if (floorsToAdd.length>0) {
+                            sortArray(floorsToAdd, -e.directionShown());
                             e.addToQueue(floorsToAdd[0]);
                             arrivedWithQueue();
                         } else {
