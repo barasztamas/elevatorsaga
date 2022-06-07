@@ -86,8 +86,23 @@
             return false;
         };
         floors.forEach(f=>{
+            f.nr = f.floorNum();
+            f.waitingFor=[];
+            f.waitingFor[-1]=false;
+            f.waitingFor[1]=false;
+            f.setWaitingFor = 
+                f.nr==0 || f.nr==floors.length ? 
+                    (direction, value) => {
+                        f.waitingFor[1]=value;
+                        f.waitingFor[-1]=value;
+                    }
+                :
+                    (direction, value) => f.waitingFor[direction]=value
+                ;
+
             f.buttonPressed = (direction) => {
-                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.floorNum(), direction)), f.floorNum());
+                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.nr, direction)), f.nr)
+                    || f.setWaitingFor(direction, true);
             };
             f.on("up_button_pressed", ()=>f.buttonPressed(1));
             f.on("down_button_pressed", ()=>f.buttonPressed(-1));
