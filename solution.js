@@ -78,18 +78,19 @@
                 e.showDirection();
             });
         });
-        addToRandomElevator = (myElevators, nr) => {
-            if (myElevators.length>0) {
-                myElevators[Math.floor(Math.random() * myElevators.length)].addToQueue(nr);
-                return true;
-            }
-            return false;
-        };
+        
         floors.forEach(f=>{
             f.nr = f.floorNum();
             f.waitingFor=[];
             f.waitingFor[-1]=false;
             f.waitingFor[1]=false;
+            f.addToRandomElevator = (myElevators) => {
+                if (myElevators.length>0) {
+                    myElevators[Math.floor(Math.random() * myElevators.length)].addToQueue(f.nr);
+                    return true;
+                }
+                return false;
+            };
             f.setWaitingFor = 
                 f.nr==0 || f.nr==floors.length ? 
                     (direction, value) => {
@@ -101,7 +102,7 @@
                 ;
 
             f.buttonPressed = (direction) => {
-                addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.nr, direction)), f.nr)
+                f.addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.nr, direction)))
                     || f.setWaitingFor(direction, true);
             };
             f.on("up_button_pressed", ()=>f.buttonPressed(1));
