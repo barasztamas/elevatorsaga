@@ -9,14 +9,6 @@
             array.sort((a,b) => direction*(a-b));
             return array;
         };
-        myAddToQueue = (nr, direction, queue)=>{
-            if(!queue.includes(nr)) {
-                queue.push(nr);
-                sortArray(queue, direction);
-                return true;
-            };
-            return false;
-        };
         elevators.forEach((e, i)=>{
             e.index = i;
             e.directionGoing = () => directionBetween(e.currentFloor(), e.destinationQueue[0]??e.currentFloor());
@@ -34,8 +26,9 @@
             };
             e.addToQueue = nr => {
                 //console.trace('start',e.index, nr, e.destinationQueue);
-                if(myAddToQueue(nr, e.directionGoing(), e.destinationQueue)){
-                    //console.trace('end',e.index, nr, e.destinationQueue);
+                if(!e.destinationQueue.includes(nr)) {
+                    e.destinationQueue.push(nr);
+                    sortArray(e.destinationQueue, e.directionGoing());
                     e.checkDestinationQueue();
                     e.showDirection();
                 };
@@ -53,15 +46,16 @@
 
                 };
                 arrivedWithEmptyQueue = () => {
-                    floorsToAdd = e.getPressedFloors().filter(f => f>=nr);
+                    dirShown = e.directionShown();
+                    floorsToAdd = e.getPressedFloors().filter(f => f*dirShown >= nr*dirShown);
                     if (floorsToAdd.length>0) {
-                        sortArray(floorsToAdd, e.directionShown());
+                        sortArray(floorsToAdd, dirShown);
                         e.addToQueue(floorsToAdd[0]);
                         arrivedWithQueue();
                     } else {
-                        floorsToAdd = e.getPressedFloors().filter(f => f<nr);
+                        floorsToAdd = e.getPressedFloors().filter(f => f*dirShown < nr*dirShown);
                         if (floorsToAdd.length>0) {
-                            sortArray(floorsToAdd, -e.directionShown());
+                            sortArray(floorsToAdd, -dirShown);
                             e.addToQueue(floorsToAdd[0]);
                             arrivedWithQueue();
                         } else {
@@ -84,6 +78,7 @@
             f.waitingFor=[];
             f.waitingFor[-1]=false;
             f.waitingFor[1]=false;
+
             f.addToRandomElevator = (myElevators) => {
                 if (myElevators.length>0) {
                     myElevators[Math.floor(Math.random() * myElevators.length)].addToQueue(f.nr);
@@ -91,19 +86,9 @@
                 }
                 return false;
             };
-            f.setWaitingFor = 
-                f.nr==0 || f.nr==floors.length ? 
-                    (direction, value) => {
-                        f.waitingFor[1]=value;
-                        f.waitingFor[-1]=value;
-                    }
-                :
-                    (direction, value) => f.waitingFor[direction]=value
-                ;
-
             f.buttonPressed = (direction) => {
                 f.addToRandomElevator(elevators.filter(e=>e.fitsInQueue(f.nr, direction)))
-                    || f.setWaitingFor(direction, true);
+                    || (f.waitingFor[direction]=true);
             };
             f.on("up_button_pressed", ()=>f.buttonPressed(1));
             f.on("down_button_pressed", ()=>f.buttonPressed(-1));
