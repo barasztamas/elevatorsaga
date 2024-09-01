@@ -59,7 +59,12 @@
                             e.addToQueue(floorsToAdd[0]);
                             arrivedWithQueue();
                         } else {
-                            //TODO várnak-e liftre;
+                            floorsToAdd = floors.filter(f => f.nr*dirShown >= nr*dirShown && f.waitingFor[dirShown]);
+                            if (floorsToAdd.length>0) {
+                                sortArray(floorsToAdd, dirShown);
+                                e.addToQueue(floorsToAdd[0].nr);
+                                floorsToAdd[0].waitingFor[dirShown]=false;
+                            }
                         }
                         ;
                     };
@@ -94,6 +99,7 @@
             f.on("down_button_pressed", ()=>f.buttonPressed(-1));
         });
 
+        floors.sort((a,b) => a.nr - b.nr);
     },
         update: (dt, elevators, floors) => {
         }
