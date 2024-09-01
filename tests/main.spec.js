@@ -1,10 +1,27 @@
 import { expect, test } from '@playwright/test';
+import { copy } from 'copy-paste';
 
-test('find speed', async ({ page }) => {
-    await page.goto('https://play.elevatorsaga.com/#challenge=1');
-    await page.waitForLoadState();
-    const increaseButton = page.locator('h3.right i.timescale_increase');
-    const speedDisplay = page.locator('h3.right i.timescale_decrease + span');
+test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    const speedSection = page.locator('div.container > div.challenge > h3.right');
+    const increaseButton = speedSection.locator('i.timescale_increase');
+    const speedDisplay = speedSection.locator('span.emphasis-color');
     expect(speedDisplay).toHaveText(/^[0-9]*x$/);
-    const speed = parseInt(await speedDisplay.innerText(), 10);
+    while (parseInt(await speedDisplay.innerText(), 10) < 10) {
+        await increaseButton.click();
+        expect(speedDisplay).toHaveText(/^[0-9]*x$/);
+    }
+    copy('{ init: () => {}, update: () => {} }');
+});
+
+Array.from({ length: 2 }, (_, i) => i + 1).forEach((level) => {
+    test(`level ${level}`, async ({ page }) => {
+        await page.goto(`/#challenge=${level}`);
+        const codebox = page.locator('div.CodeMirror-code > div > pre > span').first();
+        await codebox.click();
+        await codebox.press('ControlOrMeta+a');
+        await codebox.press('ControlOrMeta+v');
+
+        await page.getByRole('button', { name: 'Apply' }).click();
+    });
 });

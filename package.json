@@ -20,5 +20,8 @@
     "devDependencies": {
         "@playwright/test": "^1.46.1",
         "@types/node": "^22.5.1"
+    },
+    "dependencies": {
+        "copy-paste": "^1.5.3"
     }
 }
