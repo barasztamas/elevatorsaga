@@ -1,5 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { copy } from 'copy-paste';
+import fs from 'node:fs';
+import { rootPath } from '../path';
+
+const scriptTexts = {};
+test.beforeAll(async () => {
+    scriptTexts.default = fs.readFileSync(`${rootPath}/solutions/default.js`, 'utf8');
+    copy(scriptTexts.default);
+});
 
 test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -7,11 +15,10 @@ test.beforeEach(async ({ page }) => {
     const increaseButton = speedSection.locator('i.timescale_increase');
     const speedDisplay = speedSection.locator('span.emphasis-color');
     expect(speedDisplay).toHaveText(/^[0-9]*x$/);
-    while (parseInt(await speedDisplay.innerText(), 10) < 10) {
+    while (parseInt(await speedDisplay.innerText(), 10) < 1) {
         await increaseButton.click();
         expect(speedDisplay).toHaveText(/^[0-9]*x$/);
     }
-    copy('{ init: () => {}, update: () => {} }');
 });
 
 Array.from({ length: 2 }, (_, i) => i + 1).forEach((level) => {
@@ -21,7 +28,6 @@ Array.from({ length: 2 }, (_, i) => i + 1).forEach((level) => {
         await codebox.click();
         await codebox.press('ControlOrMeta+a');
         await codebox.press('ControlOrMeta+v');
-
         await page.getByRole('button', { name: 'Apply' }).click();
     });
 });
