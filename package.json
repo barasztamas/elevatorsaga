@@ -1,22 +1,24 @@
 {
-  "name": "elevatorsaga",
-  "version": "1.0.0",
-  "description": "solution to https://play.elevatorsaga.com/",
-  "main": "index.js",
-  "scripts": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/barasztamas/elevatorsaga.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/barasztamas/elevatorsaga/issues"
-  },
-  "homepage": "https://github.com/barasztamas/elevatorsaga#readme",
-  "devDependencies": {
-    "@playwright/test": "^1.46.1",
-    "@types/node": "^22.5.1"
-  }
+    "name": "elevatorsaga",
+    "version": "1.0.0",
+    "description": "solution to https://play.elevatorsaga.com/",
+    "main": "index.js",
+    "scripts": {
+        "start": "npx playwright test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/barasztamas/elevatorsaga.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/barasztamas/elevatorsaga/issues"
+    },
+    "homepage": "https://github.com/barasztamas/elevatorsaga#readme",
+    "devDependencies": {
+        "@playwright/test": "^1.46.1",
+        "@types/node": "^22.5.1"
+    }
 }
