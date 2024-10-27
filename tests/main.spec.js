@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { copy } from 'copy-paste';
 import fs from 'node:fs';
 import { rootPath } from '../path';
+import { platform } from 'node:process';
 
 const scriptTexts = {};
 test.beforeAll(async () => {
@@ -27,7 +28,7 @@ Array.from({ length: 2 }, (_, i) => i + 1).forEach((level) => {
         const codebox = page.locator('div.CodeMirror-code > div > pre > span').first();
         await codebox.click();
         await codebox.press('ControlOrMeta+a');
-        await codebox.press('ControlOrMeta+v');
+        await codebox.press(`${platform === 'linux' ? 'Shift+' : ''}ControlOrMeta+v`);
         await page.getByRole('button', { name: 'Apply' }).click();
         await page.waitForLoadState();
         const errorBlock = page.locator('div.container > div.codestatus > h5.error');
