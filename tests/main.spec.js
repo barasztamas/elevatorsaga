@@ -5,24 +5,27 @@ import { rootPath } from '../path';
 import { platform } from 'node:process';
 
 const scriptTexts = {};
-test.beforeAll(async () => {
+const runSpeed = 20;
+const levelNumbers = Array.from({ length: 2 }, (_, i) => i + 1);
+
+test.beforeAll('readScript', async () => {
     scriptTexts.default = fs.readFileSync(`${rootPath}/solutions/default.js`, 'utf8');
     copy(scriptTexts.default);
 });
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach('setSpeed', async ({ page }) => {
     await page.goto('/');
     const speedSection = page.locator('div.container > div.challenge > h3.right');
     const increaseButton = speedSection.locator('i.timescale_increase');
     const speedDisplay = speedSection.locator('span.emphasis-color');
     await expect(speedDisplay).toHaveText(/^[0-9]+x$/);
-    while (parseInt(await speedDisplay.innerText(), 10) < 20) {
+    while (parseInt(await speedDisplay.innerText(), 10) < runSpeed) {
         await increaseButton.click();
         await expect(speedDisplay).toHaveText(/^[0-9]*x$/);
     }
 });
 
-Array.from({ length: 2 }, (_, i) => i + 1).forEach((level) => {
+levelNumbers.forEach((level) => {
     test(`level ${level}`, async ({ page }) => {
         await page.goto(`/#challenge=${level}`);
         const codebox = page.locator('div.CodeMirror-code > div > pre > span').first();
