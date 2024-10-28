@@ -33,7 +33,11 @@ levelNumbers.forEach((level) => {
         await page.getByRole('button', { name: 'Apply' }).click();
         await page.waitForLoadState();
         const errorBlock = page.locator('div.container > div.codestatus > h5.error');
-        await expect(errorBlock).toHaveText(/^ There is a problem with your code: $/);
+        if ((await errorBlock.evaluate((e) => window.getComputedStyle(e).getPropertyValue('display'))) !== 'none') {
+            await test.info().attach('error', { body: await errorBlock.textContent() });
+            throw 'Syntax error in code';
+        }
+        expect(errorBlock).toHaveCSS('display', 'none', { timeout: 10 });
     });
 });
 
