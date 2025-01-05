@@ -30,6 +30,7 @@ levelNumbers.forEach((level) => {
         const codeboxEnd = codebox.last();
         await codeboxEnd.click();
         await codeboxEnd.press('ControlOrMeta+a');
+        await codeboxEnd.press('Delete');
         await pushTextWithBrackets(scriptTexts.default, codeboxEnd);
         await page.getByRole('button', { name: 'Apply' }).click();
         await page.waitForLoadState();
